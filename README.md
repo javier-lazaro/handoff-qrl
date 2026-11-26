@@ -1,5 +1,7 @@
 # Handoff training and the attribution problem in hybrid quantum reinforcement learning
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24566459.svg)](https://doi.org/10.5281/zenodo.24566459)
+
 Code and experimental results for the paper by Javier Lázaro, Juan-Ignacio Vazquez and Pablo Garcia-Bringas.
 
 This repository is self-contained and supports two reproducibility workflows:
@@ -143,6 +145,10 @@ environment/                  public analysis and training dependency locks
 ```
 
 For release-scope and data-provenance notes, see [`PROVENANCE.md`](PROVENANCE.md).
+
+## Citation
+
+The archived release of this repository is available on Zenodo: [10.5281/zenodo.24566459](https://doi.org/10.5281/zenodo.24566459). Citation metadata are in [`CITATION.cff`](CITATION.cff).
 
 ## Licence
 

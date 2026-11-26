@@ -4,16 +4,20 @@ title: "Handoff training and the attribution problem in hybrid quantum reinforce
 type: software
 version: "1.0.0"
 date-released: "2026-11-26"
+doi: "10.5281/zenodo.24566459"
 authors:
   - family-names: "Lazaro"
     given-names: "Javier"
     affiliation: "University of Deusto"
+    orcid: "https://orcid.org/0009-0008-2195-4301"
   - family-names: "Vazquez"
     given-names: "Juan-Ignacio"
     affiliation: "University of Deusto"
+    orcid: "https://orcid.org/0000-0001-6385-5717"
   - family-names: "Garcia-Bringas"
     given-names: "Pablo"
     affiliation: "University of Deusto"
+    orcid: "https://orcid.org/0000-0003-3594-9534"
 license: MIT
 repository-code: "https://github.com/javier-lazaro/handoff-qrl"
 keywords:
