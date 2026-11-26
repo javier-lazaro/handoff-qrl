@@ -1,0 +1,32 @@
+[project]
+name = "handoff-qrl"
+version = "0.1.0"
+description = "Code and experimental results for handoff training and attribution in hybrid quantum reinforcement learning."
+requires-python = ">=3.12,<3.13"
+authors = [{ name = "Javier Lázaro González" }]
+license = "MIT"
+dependencies = []
+
+[project.optional-dependencies]
+analysis = [
+  "numpy==2.5.0",
+  "pandas==3.0.2",
+  "matplotlib==3.10.8",
+  "PyYAML==6.0.3",
+]
+dev = [
+  "pytest==9.1.1",
+  "ruff==0.15.20",
+]
+
+[build-system]
+requires = ["setuptools>=81"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["handoff_qrl*", "simplyqrl*", "hybrid_training_qrl*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

@@ -1,0 +1,3 @@
+environment,evidence_role,n,full_classical_mean_return,h0_mean_return,h1_mean_return,h1_retention_pct_of_full_classical,h1_paired_delta_vs_h0,h1_holm_p_vs_h0,h1_holm_reject_0_05_vs_h0,h1_qforward_saved_vs_h0_pct,rq2_any_holm_reject_0_05
+lunarlander,retrospective,20,230.7967877412872,149.12797128323842,223.39459191340706,96.7927647952459,74.2666206301687,0.00107574462890625,True,67.65940826091202,False
+minatar,prospective_confirmatory,20,19.653500000000005,23.384,18.865499999999997,95.99053603683818,-4.5184999999999995,0.0777435302734375,False,93.22396699445879,False

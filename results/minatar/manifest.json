@@ -1,0 +1,108 @@
+{
+  "active_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "conditions": [
+    "full_classical",
+    "C(0)",
+    "H(0)",
+    "C(0.25)",
+    "H(0.25)",
+    "C(0.5)",
+    "H(0.5)",
+    "C(0.75)",
+    "H(0.75)",
+    "H(1)"
+  ],
+  "dataset_kind": "paper_evidence",
+  "environment": "minatar",
+  "evaluation_contract": {
+    "environment_seed_start": 15000,
+    "episodes": 100,
+    "policy_seed_start": 25000,
+    "stochastic": true
+  },
+  "evidence_role": "prospective_confirmatory",
+  "files": [
+    {
+      "bytes": 1764,
+      "path": "README.md",
+      "sha256": "8444aa97dd7680be7e5215c987daac4b02ac799ec7592391d661a9cf1804702d"
+    },
+    {
+      "bytes": 59919,
+      "path": "data/evaluation_endpoints.csv",
+      "sha256": "8a8632fbed559073c9aac79eb3a7d4f5332e764b2e8f54ad30a1521ca4420459"
+    },
+    {
+      "bytes": 1913528,
+      "path": "data/evaluation_episodes.csv.gz",
+      "sha256": "6057d9fc1a64bedb29a3a0edba2c7ba4033c0bfd71b51053fdff86e2dd90d3f2"
+    },
+    {
+      "bytes": 2249,
+      "path": "data/full_classical_matrix.csv",
+      "sha256": "df45f4d79f9fa69a3e44a1a3c5890bdb17d8ffbcb491e7b87b10a379e9c68c52"
+    },
+    {
+      "bytes": 66970,
+      "path": "data/handoff_matrix.csv",
+      "sha256": "bdbea39b47ccd99d6578dc0f5bd5811ca5aa539962f1a9a1b6a570db3584c9ec"
+    },
+    {
+      "bytes": 64795,
+      "path": "data/kd_diagnostics.csv",
+      "sha256": "7cac516b5f477eac5adb4a22a211e47c0ab47d76b0d9aba1a82ca643afb7c408"
+    },
+    {
+      "bytes": 13849,
+      "path": "data/quantum_forward_accounting.csv",
+      "sha256": "71962eada3e79e247ea7f70f712151af9b2992543ff4975ce1274fd6f91b6abf"
+    },
+    {
+      "bytes": 44408737,
+      "path": "data/training_episode_returns.csv.gz",
+      "sha256": "1e7939f1dec77e7c78e85742adcfbffdfd31f74b1a008849488dfe5d3cf1f16b"
+    },
+    {
+      "bytes": 38466284,
+      "path": "data/training_update_metrics.csv.gz",
+      "sha256": "919e45cacd83c31dca6e4762563a09ca73e085d678fbc7d1e5d7286da5a87cc2"
+    }
+  ],
+  "row_counts": {
+    "evaluation_endpoints.csv": 480,
+    "evaluation_episodes.csv.gz": 48000,
+    "full_classical_matrix.csv": 20,
+    "handoff_matrix.csv": 180,
+    "kd_diagnostics.csv": 140,
+    "quantum_forward_accounting.csv": 180,
+    "training_episode_returns.csv.gz": 5104416,
+    "training_update_metrics.csv.gz": 586080
+  },
+  "schema_version": 1,
+  "status": "COMPLETE",
+  "training_curve_contract": {
+    "full_classical_is_shared_teacher_trajectory": true,
+    "staged_conditions_contain_post_handoff_training_only": true
+  }
+}

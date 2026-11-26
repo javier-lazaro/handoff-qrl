@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the associated paper."
+title: "Handoff training and the attribution problem in hybrid quantum reinforcement learning"
+type: software
+version: "1.0.0"
+date-released: "2026-11-26"
+authors:
+  - family-names: "Lazaro"
+    given-names: "Javier"
+    affiliation: "University of Deusto"
+  - family-names: "Vazquez"
+    given-names: "Juan-Ignacio"
+    affiliation: "University of Deusto"
+  - family-names: "Garcia-Bringas"
+    given-names: "Pablo"
+    affiliation: "University of Deusto"
+license: MIT
+repository-code: "https://github.com/javier-lazaro/handoff-qrl"
+keywords:
+  - quantum reinforcement learning
+  - variational quantum circuits
+  - hybrid quantum-classical models
+  - knowledge distillation
+  - proximal policy optimisation

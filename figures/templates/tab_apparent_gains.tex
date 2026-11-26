@@ -1,0 +1,26 @@
+%% Hand-authored layout; every number is a macro from numbers.tex (public paper evidence surface).
+\begin{tabular}{@{}p{0.25\textwidth}p{0.22\textwidth}p{0.22\textwidth}p{0.22\textwidth}@{}}
+\toprule
+Apparent gain & Uncontrolled evidence & Control & Reading\\
+\midrule
+\textit{LunarLander.} Delaying the quantum head outperforms training it from scratch &
+$H(1)-H(0)=\NumLLHoneVsHzeroDelta$ ($p_\mathrm{Holm}=\NumLLHoneVsHzeroHolm$); $H(0.5)-H(0)=\NumLLHhalfVsHzeroDelta$ &
+Teacher: $H(1)-\mathrm{teacher}=\NumLLHoneVsTeacherDelta$. Twin: $H(0.5)-C(0.5)=\NumLLHhalfVsChalfDelta$ ($p_\mathrm{Holm}=\NumLLHhalfVsChalfHolm$) &
+Inherited from the classical teacher; reproduced by the classical twin\\
+\addlinespace
+\textit{LunarLander.} A late handoff matches the from-scratch hybrid with fewer quantum evaluations &
+$H(0.75)$: \NumLLQfwdChangeHthreeq\% evaluations, $\Delta=\NumLLHthreeqVsHzeroDelta$ vs $H(0)$ &
+Twin with no quantum evaluations: $H(0.75)-C(0.75)=\NumLLHthreeqVsCthreeqDelta$ ($p_\mathrm{Holm}=\NumLLHthreeqVsCthreeqHolm$) &
+Saving is local to the hybrid family\\
+\addlinespace
+\textit{MinAtar.} Compact hybrid heads outperform the full classical reference &
+$H(0)-\mathrm{FC}=+\NumMAHzeroVsFCDelta$ ($p=\NumMAHzeroVsFCP$, unadjusted) &
+$C(0)-\mathrm{FC}=+\NumMACzeroVsFCDelta$; $H(0)-C(0)=\NumMAHzeroVsCzeroDelta$ ($p_\mathrm{Holm}=\NumMAHzeroVsCzeroHolm$) &
+A property of the compact head, not of the circuit\\
+\addlinespace
+\textit{LunarLander, $t=0.25$.} The hybrid head adapts better during online training &
+Online-gain interaction $\NumLLInteractionquarter$ [\NumLLInteractionquarterLo, \NumLLInteractionquarterHi] &
+Post-distillation gap $\NumLLPostKDGapquarter$; MinAtar interaction $\NumMAInteractionquarter$ [\NumMAInteractionquarterLo, \NumMAInteractionquarterHi] &
+Recovery from a poorer installation; not replicated\\
+\botrule
+\end{tabular}

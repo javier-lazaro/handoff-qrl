@@ -1,0 +1,16 @@
+# Source/code text is normalized to LF.
+* text=auto eol=lf
+
+# Frozen released evidence is hashed byte-for-byte by its manifests.
+# Never apply text conversion inside this surface.
+results/lunarlander/** -text
+results/minatar/** -text
+
+# Compressed/binary scientific artefacts.
+*.gz binary
+*.zip binary
+*.npz binary
+*.pt binary
+*.pth binary
+*.pdf binary
+*.png binary

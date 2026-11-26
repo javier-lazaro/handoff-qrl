@@ -1,0 +1,4 @@
+prediction,definition,minatar_status,return_condition_met,resource_condition_met,holm_condition_met,note
+P1,H(1) > H(0) in final return with lower quantum-forward cost,not_supported_prospective,False,True,False,Prospective replication of the retrospective Lunar result.
+P2,At least one interior H(t) Pareto-dominates H(0),not_supported_prospective,False,True,False,"[{""cheaper"": true, ""holm"": false, ""label"": ""H(0.25)"", ""positive"": false}, {""cheaper"": true, ""holm"": false, ""label"": ""H(0.5)"", ""positive"": false}, {""cheaper"": true, ""holm"": false, ""label"": ""H(0.75)"", ""positive"": false}]"
+P3,Full-capacity classical continuation beats switching to H(t) at each interior handoff,not_supported_prospective,False,,,Secondary prediction; no third Holm family is created.

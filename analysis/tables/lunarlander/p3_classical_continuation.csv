@@ -1,0 +1,4 @@
+prediction,handoff_t,contrast,n,paired_mean_difference,ci95_low,ci95_high,sign_flip_p_unadjusted,wins_classical,status
+P3,0.25,full classical continuation - hybrid switch,20,59.18842059497992,24.06832506583894,93.08530140090782,0.005535125732421875,15,supported_retrospective
+P3,0.5,full classical continuation - hybrid switch,20,45.58487401740004,11.032283258818428,80.16073671532095,0.021196365356445312,16,supported_retrospective
+P3,0.75,full classical continuation - hybrid switch,20,72.3259263937571,47.667376698382036,98.25618293780809,1.52587890625e-05,17,supported_retrospective

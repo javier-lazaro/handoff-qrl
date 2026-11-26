@@ -1,0 +1,240 @@
+protocol_version: 2
+protocol_id: minatar_paper_protocol_v1
+status: frozen
+scope: >-
+  Final prospective MinAtar Breakout protocol used for the paper. This contract
+  fixes the paper-facing horizon, handoffs, architectures, optimizer policy,
+  KD procedure, execution cohorts, resource accounting and statistical rules.
+
+research_design:
+  training_seed_is_statistical_unit: true
+  canonical_handoff_t: [0.0, 0.25, 0.5, 0.75, 1.0]
+  legacy_mapping:
+    H(0): Q100
+    H(0.25): Q75
+    H(0.5): Q50
+    H(0.75): Q25
+    H(1): Qdownstream
+  conditions:
+    full_classical:
+      required: true
+      role: full_capacity_reference_and_classical_continued
+    hybrid: ["H(0)", "H(0.25)", "H(0.5)", "H(0.75)", "H(1)"]
+    compact_classical: ["C(0)", "C(0.25)", "C(0.5)", "C(0.75)"]
+    c1_forbidden: true
+
+representation:
+  family: cnn
+  tensor_format: channels_last
+  normalize_images: false
+  features_dim: 32
+  classical_online: trainable
+  kd_dataset_export: frozen_teacher_snapshot
+  delayed_post_kd_online: trainable
+  qdownstream_post_kd: frozen_no_online_training
+
+architectures:
+  shared_extractor:
+    - Conv2d(4,16,3x3,stride=1,pad=1) + ReLU
+    - Conv2d(16,32,3x3,stride=1,pad=1) + ReLU
+    - AdaptiveAvgPool2d(4,4)
+    - Flatten(512)
+    - Linear(512,32) + ReLU
+  full_classical:
+    actor: Linear(32,64) + Tanh -> Linear(64,6)
+    critic: Linear(32,64) + Tanh -> Linear(64,1)
+  hybrid_compact:
+    input_adapter: identity
+    factory: hybrid_training_qrl.quantum.circuits:build_chunked_angle_rx_ryrz_cnot
+    n_qubits: 8
+    full_d32_passes: 1
+    chunks_per_pass: 4
+    q_output_dim: 8
+    entangler: cnot_circular
+    diff_method: backprop
+    readout_hidden_sizes: [64]
+    activation: tanh
+  compact_classical:
+    projection: Linear(32,8) + Tanh
+    readout_hidden_sizes: [64]
+    activation: tanh
+
+ppo:
+  canonical_unit: ppo_updates
+  num_envs: 8
+  num_steps: 128
+  env_steps_per_update: 1024
+  total_updates: 4884
+  total_env_steps: 5001216
+  learning_rate: 0.00025
+  gamma: 0.99
+  gae_lambda: 0.95
+  num_minibatches: 4
+  update_epochs: 4
+  norm_adv: true
+  clip_coef: 0.2
+  clip_vloss: true
+  ent_coef: 0.01
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  lr_policy:
+    primary:
+      name: constant_lr
+      anneal_lr: false
+    fallback:
+      name: canonical_compact_linear_anneal
+      activation: only_if_compact_constant_lr_nondegeneration_gate_fails
+      applies_to: [hybrid, compact_classical]
+      base_lr: 0.00025
+      canonical_compact_horizon_updates: 4884
+      update_index_origin: 1
+      formula: lr_k = base_lr * (1 - (k - 1) / 4884)
+      common_prefix_across_handoffs: true
+      renormalize_to_remaining_horizon: false
+      full_classical_failure: protocol_blocker_no_automatic_fallback
+      further_lr_tuning_forbidden: true
+
+handoff:
+  bridge: offline_policy_value_kd
+  teacher_checkpoints_from_same_full_classical_trajectory: true
+  canonical_checkpoints:
+    - {handoff_t: 0.25, update: 1221, env_steps: 1250304}
+    - {handoff_t: 0.5, update: 2442, env_steps: 2500608}
+    - {handoff_t: 0.75, update: 3663, env_steps: 3750912}
+    - {handoff_t: 1.0, update: 4884, env_steps: 5001216}
+  optimizer:
+    rebuild_after_head_replacement: true
+    preserve_pre_handoff_optimizer_state: false
+  delayed_online:
+    freeze_feature_extractor: false
+    feature_interface_trainable: true
+  exact_hybrid_classical_pairing_required:
+    - training_seed
+    - teacher_checkpoint
+    - kd_dataset_bytes
+    - kd_dataset_seed_contract
+    - downstream_environment_step_budget
+    - feature_extractor_state_at_handoff
+    - optimizer_rebuild_semantics
+    - torch_device
+
+qdownstream:
+  condition: H(1)
+  definition: full_classical_teacher_plus_offline_hybrid_kd
+  online_quantum_ppo_steps: 0
+  online_quantum_ppo_updates: 0
+  post_kd_optimizer_rebuild_required: false
+  feature_extractor_updates_after_teacher: false
+  quantum_cost_scope: kd_only
+
+qualification:
+  random_policy:
+    must_precede_paper_facing_training: true
+    episodes: 100
+    deterministic: false
+    environment_seed_start: 15000
+    policy_seed_start: 25000
+    sticky_actions_required: true
+    max_eval_steps: 1000
+    fresh_environment_per_episode: true
+    policy_sampling:
+      distribution: uniform_discrete
+      rng: numpy.random.Generator
+      bit_generator: PCG64
+      reseed_per_episode: true
+      action_draw: integers_low0_high_action_count_endpoint_false
+    freeze_once: true
+    threshold_multiplier: 5.0
+  constant_lr_gate:
+    decision_seeds: [0, 1, 2]
+    families: [full_classical, "H(0)", "C(0)"]
+    qualification_milestone: {update: 977, env_steps: 1000448}
+    preregistered_eval_updates: [977, 1221, 2442, 3663, 4884]
+    requirements:
+      technical_health: no_nan_inf_optimizer_failure_or_bug_collapse
+      final_vs_random: final_eval_return >= 5 * frozen_random_policy_mean
+      final_retention: final_eval_return >= 0.5 * best_preregistered_milestone_return
+      all_decision_seed_runs_must_pass: true
+    if_full_classical_fails: stop_as_protocol_blocker
+    if_compact_family_fails: activate_single_global_compact_lr_fallback_and_repeat_gate
+    no_criterion_against_historical_annealed_runs: true
+  kd_gate:
+    handoff_t: 0.5
+    decision_seeds: [0, 1, 2]
+    families: [hybrid, compact_classical]
+    primary_recipe:
+      train_samples: 65536
+      validation_samples: 8192
+      epochs: 20
+      batch_size: 128
+      learning_rate: 0.001
+      policy_weight: 1.0
+      value_weight: 0.5
+    requirements:
+      actor_validation_action_agreement: ">= 0.95"
+      critic_validation_r2: "> 0"
+      policy_kl: continuous_diagnostic_only
+    single_fallback:
+      train_samples: 131072
+      validation_samples: 16384
+      global_if_activated: true
+      applies_to_all_handoffs_seeds_and_both_head_families: true
+      further_kd_tuning_forbidden: true
+
+execution:
+  total_training_seeds: 20
+  all_conditions_use_same_training_seed_set: true
+  serial_resource_cohort: [0, 1, 2, 3, 4]
+  gate_decision_seeds: [0, 1, 2]
+  post_gate_serial_seeds: [3, 4]
+  concurrent_expansion_seeds: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  concurrency_gate_required_before_parallel_expansion: true
+  concurrent_timings_are_paper_facing: false
+  paper_facing_timing_seeds: [0, 1, 2, 3, 4]
+  paper_facing_codecarbon_seeds: [0, 1, 2, 3, 4]
+  paper_facing_resource_runs_must_be_serial: true
+
+resource_accounting:
+  torch_device: cpu
+  qml_device: default.qubit
+  qnode_wrapper_device: cpu
+  primary_quantum_metric: sample-level quantum forward evaluations
+  qnode_accounting:
+    counters: [qnode_calls_grad_total, qnode_calls_nograd_total]
+    identity: qnode_calls_total = qnode_calls_grad_total + qnode_calls_nograd_total
+    qnode_time_scope: quantum_forward_only_not_backward
+  split_grad_and_nograd: true
+  secondary_metrics:
+    - qnode_forward_time
+    - ppo_update_time
+    - wall_clock
+    - codecarbon_estimated_energy_and_emissions
+  codecarbon_parallel_runs_are_paper_facing: false
+  no_shot_parameter_shift_or_hardware_extrapolation: true
+
+statistics:
+  unit: training_seed
+  primary_estimand: paired_mean_difference
+  confidence_interval: paired_bootstrap
+  confirmatory_p_value:
+    primary: exact_sign_flip
+    fallback_if_exact_infeasible: monte_carlo_sign_flip
+  multiplicity:
+    method: holm
+    families:
+      allocation: ["H(0.25)-H(0)", "H(0.5)-H(0)", "H(0.75)-H(0)", "H(1)-H(0)"]
+      attribution: ["H(0)-C(0)", "H(0.25)-C(0.25)", "H(0.5)-C(0.5)", "H(0.75)-C(0.75)"]
+  secondary_estimands: [iqm, probability_of_improvement]
+  rq3_role: descriptive_mechanistic_not_third_confirmatory_family
+  tost: false
+  equivalence_from_nonsignificance_forbidden: true
+  lunarlander_role: retrospective_under_this_contract
+  minatar_role: prospective_confirmatory
+
+scope_constraints:
+  architecture_search_closed: true
+  schedule_specific_tuning_forbidden: true
+  seed_count_reduction_forbidden: true
+  handoff_removal_forbidden: true
+  iso_qnode_experiment: false
+  third_environment_in_study: false

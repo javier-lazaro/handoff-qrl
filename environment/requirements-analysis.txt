@@ -1,0 +1,16 @@
+numpy==2.5.0
+pandas==3.0.2
+matplotlib==3.10.8
+PyYAML==6.0.3
+# Transitive dependencies, pinned so that figure PDFs are byte-reproducible
+# (fonttools controls font subsetting in matplotlib's PDF output).
+contourpy==1.4.0
+cycler==0.12.1
+fonttools==4.68.0
+kiwisolver==1.5.1
+packaging==26.3
+pillow==13.0.0
+pyparsing==3.3.3
+python-dateutil==3.0.0
+six==1.17.0
+tzdata==2026.6

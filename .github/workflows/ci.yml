@@ -1,0 +1,68 @@
+name: reproducibility
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: reproducibility-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  paper-reproduction:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12.13'
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - name: Install public analysis environment
+        run: |
+          pip install -r environment/requirements-analysis.txt
+          pip install pytest==9.1.1 ruff==0.15.20
+          pip install -e . --no-deps
+      - run: python -m compileall -q src scripts
+      - run: pytest -q
+      - run: python scripts/audit_release_hygiene.py
+      - run: python scripts/reproduce_paper.py
+
+  training-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12.13'
+      - run: python -m pip install --upgrade pip
+      - name: Install public CPU training environment
+        run: |
+          pip install torch==2.12.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r environment/requirements-cpu.txt
+          pip install -e . --no-deps
+      - run: python -m compileall -q src scripts
+      - name: MinAtar protocol-matrix mechanics smoke
+        run: >
+          python scripts/run_experiments.py
+          --environment minatar
+          --seeds 0
+          --conditions all
+          --smoke
+          --output-root runs/ci-minatar
+      - run: test -f runs/ci-minatar/minatar/c_0p5/seed0/experiment_summary.json
+      - run: test -f runs/ci-minatar/minatar/h_1/seed0/experiment_summary.json
+      - name: LunarLander protocol-matrix mechanics smoke
+        run: >
+          python scripts/run_experiments.py
+          --environment lunarlander
+          --seeds 0
+          --conditions all
+          --smoke
+          --output-root runs/ci-lunarlander
+      - run: test -f runs/ci-lunarlander/lunarlander/c_0p5/seed0/experiment_summary.json
+      - run: test -f runs/ci-lunarlander/lunarlander/h_1/seed0/experiment_summary.json

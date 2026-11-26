@@ -1,0 +1,123 @@
+protocol_version: 2
+protocol_id: lunarlander_paper_protocol_v1
+status: frozen
+environment: LunarLander-v3
+paper_role: retrospective_development_environment
+training_seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+
+conditions:
+  full_classical: true
+  hybrid: ["H(0)", "H(0.25)", "H(0.5)", "H(0.75)", "H(1)"]
+  compact_classical: ["C(0)", "C(0.25)", "C(0.5)", "C(0.75)"]
+  legacy_mapping:
+    H(0): q100
+    H(0.25): q75
+    H(0.5): q50
+    H(0.75): q25
+    H(1): qdownstream
+
+observation:
+  interface: identity
+  dimension: 8
+
+architectures:
+  full_classical:
+    actor_hidden_sizes: [128, 128]
+    critic_hidden_sizes: [128, 128]
+    activation: tanh
+  hybrid:
+    quantum_core:
+      factory: hybrid_training_qrl.quantum.circuits:build_angle_rx_ryrz_cnot_reuploading
+      n_qubits: 8
+      n_layers_q: 5
+      entangler: cnot_circular
+      qml_device: default.qubit
+      diff_method: backprop
+      q_output_dim: 8
+    readout_hidden_sizes: [8]
+    activation: tanh
+  compact_classical:
+    hidden_sizes: [8]
+    activation: tanh
+
+ppo:
+  total_rollouts: 64
+  num_envs: 16
+  num_steps: 1024
+  rollout_env_steps: 16384
+  total_env_steps: 1048576
+  gamma: 0.999
+  gae_lambda: 0.98
+  num_minibatches: 256
+  update_epochs: 4
+  norm_adv: true
+  clip_coef: 0.2
+  clip_vloss: false
+  ent_coef: 0.01
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  full_classical:
+    learning_rate: 0.0003
+    anneal_lr: false
+  compact_and_hybrid:
+    learning_rate: 0.001
+    learning_rate_mode: separate_actor_critic
+    actor_learning_rate: 0.002
+    critic_learning_rate: 0.001
+    shared_learning_rate: 0.001
+    gradient_clipping_mode: separate_actor_critic
+    actor_max_grad_norm: 0.5
+    critic_max_grad_norm: 0.5
+    shared_max_grad_norm: 0.5
+    anneal_lr: false
+
+handoff:
+  H(0): {classical_rollouts: 0, hybrid_rollouts: 64}
+  H(0.25): {classical_rollouts: 16, hybrid_rollouts: 48}
+  H(0.5): {classical_rollouts: 32, hybrid_rollouts: 32}
+  H(0.75): {classical_rollouts: 48, hybrid_rollouts: 16}
+  H(1): {classical_rollouts: 64, hybrid_rollouts: 0}
+
+kd:
+  collection_policy: stochastic_teacher
+  train_samples: 65536
+  validation_samples: 8192
+  epochs: 20
+  batch_size: 128
+  temperature: 1.0
+  learning_rate: 0.001
+  policy_weight: 1.0
+  value_weight: 0.5
+  device: cpu
+  dataset:
+    train_environment_seed_base: 11000
+    train_policy_seed_base: 21000
+    validation_environment_seed_base: 31000
+    validation_policy_seed_base: 41000
+    permutation_seed_base: 51000
+    student_init_seed_base: 61000
+    dataloader_seed_base: 71000
+    full_pool_permuted_before_kd: true
+    paired_hybrid_classical_dataset_bytes_required: true
+
+pairing:
+  attribution_controls:
+    exact_teacher_checkpoint_required: true
+    exact_kd_dataset_bytes_required: true
+    same_remaining_online_budget_required: true
+  H(1):
+    reuses_same_seed_full_classical_final_teacher: true
+
+posthoc_evaluation:
+  episodes: 100
+  deterministic: false
+  environment_seed_start: 15000
+  policy_seed_start: 25000
+  max_eval_steps: 1000
+  excluded_from_training_resource_totals: true
+
+execution:
+  torch_device: cpu
+  qml_device: default.qubit
+  public_runner: serial
+  parallelism_is_operational_only: true
